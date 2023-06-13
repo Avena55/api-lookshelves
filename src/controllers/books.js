@@ -5,8 +5,8 @@ const userShelf = async (req, res) => {
     const { user } = req;    
 
     try {
-        const books = await connection.query('select * from books where user_id = $1', [user.id]);
-        return res.status(200).json(books.rows);
+        const books = await connection.knex('books').where({ user_id: user.id });        
+        return res.status(200).json(books);
 
     } catch (error) {
         return res.status(400).json(error.message); 
@@ -23,7 +23,7 @@ const registerBook = async (req, res) => {
     }
 
     try {
-        const bookToBeRegistered = await connection.query('insert into books (user_id, ISBN, comment, rating) values ($1, $2, $3, $4)', [user.id, bookIsbn, comment, rating]);
+        const bookToBeRegistered = await connection.knex('books').insert({ user_id: user.id, isbn: bookIsbn, comment: comment, rating: rating});
 
         if (bookToBeRegistered.rowCount === 0) {
             return res.status(400).json('Não foi possível cadastrar o livro.');
@@ -42,15 +42,15 @@ const updateBook = async (req, res) => {
     const { id: bookId } = req.params;
 
     try {
-        const existingBook = await connection.query('select * from books where id = $1 and user_id = $2', [bookId, user.id]);        
+        const existingBook = await connection.knex('books').where({ user_id: user.id, id: bookId}).first();
         
-        if (existingBook.rowCount === 0) {
+        if (!existingBook) {
             return res.status(400).json('O livro não foi encontrado.');
         }
 
-        const bookToBeUpdated = await connection.query('update books set comment = $1, rating = $2 where id = $3 and user_id = $4', [comment, rating, bookId, user.id]);
+        const bookToBeUpdated = await connection.knex('books').update({ comment, rating }).where( { id: bookId, user_id: user.id });
 
-        if (bookToBeUpdated.rowCount === 0) {
+        if (!bookToBeUpdated) {
             return res.status(400).json('Não foi possível atualizar o livro.');
         }
 
@@ -66,15 +66,15 @@ const deleteBook = async (req, res) => {
     const { id: bookId } = req.params;
 
     try {
-        const existingBook = await connection.query('select * from books where id = $1 and user_id = $2', [bookId, user.id]);
+        const existingBook = await connection.knex('books').where({ user_id: user.id, id: bookId}).first();
 
-        if (existingBook.rowCount === 0) {
+        if (!existingBook) {
             return res.status(404).json('O livro não foi encontrado.');
         }
 
-        const { rowCount: wasItDeleted } = connection.query('delete from books where id = $1', [bookId]);
+        const booktoBeDeleted = await connection.knex('books').del().where( { id: bookId, user_id: user.id });
 
-        if (wasItDeleted) {
+        if (!booktoBeDeleted) {
             return res.status(400).json('Não foi possível excluir o livro.');            
         }
 

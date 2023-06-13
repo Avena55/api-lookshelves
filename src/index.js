@@ -1,4 +1,5 @@
 const express = require('express');
+const knex = require('./connection')
 const routes = require('./routes');
 const cors = require('cors')
 
