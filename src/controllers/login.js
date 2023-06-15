@@ -11,14 +11,11 @@ const login = async (req, res) => {
     }
 
     try {
-        const queryEmailCheck = 'select * from users where email = $1';
-        const { rows, rowCount: isEmailRegistered } = await connection.query(queryEmailCheck, [email]);
+        const user = await connection.knex('users').where({ email }).first();
 
-        if (!isEmailRegistered) {
-            return res.status(400).json('Usuário não encontrado.');
+        if (!user) {
+            return res.status(400).json('Usuário não cadastrado.');
         }
-
-        const user = rows[0];
 
         const verifiedPassword = await bcrypt.compare(password, user.senha);
 

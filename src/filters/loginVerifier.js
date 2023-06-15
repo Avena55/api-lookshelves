@@ -14,14 +14,13 @@ const loginVerifier = async (req, res, next) => {
 
         const { id } = jwt.verify(token, secretKey);
 
-        const query = 'select * from users where id = $1';
-        const { rows, rowCount: isUserRegistered } = await connection.query(query, [id]);
+        const isUserRegistered = await connection.knex('users').where({ id }).first();
 
         if (!isUserRegistered) {
             return res.status(404).json('O usuário não foi encontrado.');
         }
         
-        const { senha, ...user } = rows[0];
+        const { senha, ...user } = isUserRegistered;
 
         req.user = user;
 

@@ -17,17 +17,15 @@ const register = async(req, res) => {
     }
 
     try {
-        const queryEmailCheck = 'select * from users where email = $1';
-        const { rowCount: isEmailDuplicate } = await connection.query(queryEmailCheck, [email]);
+        const isEmailDuplicate = await connection.knex('users').where({email}).first();
 
         if (isEmailDuplicate) {
             return res.status(400).json('O email informado já existe.');
         }
 
         const encryptedPassword = await bcrypt.hash(password, 10);
-
-        const query = `insert into users (nome, email, senha) values ($1, $2, $3);`
-        const user = await connection.query(query, [nome, email, encryptedPassword]);
+ 
+        const user = await connection.knex('users').insert({ nome, email, senha: encryptedPassword  });
 
         if (user.rowCount === 0) {
             return res.status(400).json('Não foi possível cadastrar o usuário.');
@@ -45,8 +43,8 @@ const getUser = async(req, res) => {
     const { user } = req;    
 
     try {
-        const userData = await connection.query('select nome, email from users where id = $1', [user.id]);
-        return res.status(200).json(userData.rows[0]);
+        const userData = await connection.knex.select('nome', 'email').from('users').where({id: user.id})
+        return res.status(200).json(userData);
 
     } catch (error) {
         return res.status(400).json(error.message); 
