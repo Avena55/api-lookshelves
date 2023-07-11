@@ -2,15 +2,14 @@ const connection = require('../connection');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const secretKey = require('../secretKey');
+const loginSchema = require('../validation/loginSchema');
 
 const login = async (req, res) => {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(404).json('Email e senha são obrigatórios.')
-    }
-
     try {
+        await loginSchema.validate(req.body);
+
         const user = await connection.knex('users').where({ email }).first();
 
         if (!user) {
