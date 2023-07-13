@@ -1,4 +1,5 @@
 const connection = require('../connection');
+const bookSchema = require('../validation/bookSchema')
 
 
 const userShelf = async (req, res) => {    
@@ -15,15 +16,13 @@ const userShelf = async (req, res) => {
 }
 
 const registerBook = async (req, res) => {
-    const { bookIsbn, comment, rating } = req.body;
-    const { user } = req;
-
-    if (!bookIsbn) {
-        return res.status(404).json('Por favor informe o ISBN do livro.');
-    }
+    const { bookTitle, isbn, comment, rating } = req.body;
+    const { user } = req;   
 
     try {
-        const bookToBeRegistered = await connection.knex('books').insert({ user_id: user.id, isbn: bookIsbn, comment: comment, rating: rating});
+        await bookSchema.validate(req.body);
+
+        const bookToBeRegistered = await connection.knex('books').insert({ user_id: user.id, title: bookTitle, isbn, comment, rating});
 
         if (bookToBeRegistered.rowCount === 0) {
             return res.status(400).json('Não foi possível cadastrar o livro.');
