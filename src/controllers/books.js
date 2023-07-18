@@ -17,12 +17,13 @@ const userShelf = async (req, res) => {
 
 const registerBook = async (req, res) => {
     const { bookTitle, isbn, comment, rating } = req.body;
-    const { user } = req;   
+    const { user } = req;
+    const bookCover = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
 
     try {
         await bookSchema.validate(req.body);
 
-        const bookToBeRegistered = await connection.knex('books').insert({ user_id: user.id, title: bookTitle, isbn, comment, rating});
+        const bookToBeRegistered = await connection.knex('books').insert({ user_id: user.id, title: bookTitle, isbn, comment, rating, cover: bookCover });
 
         if (bookToBeRegistered.rowCount === 0) {
             return res.status(400).json('Não foi possível cadastrar o livro.');

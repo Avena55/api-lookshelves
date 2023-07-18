@@ -34,7 +34,7 @@ const getUser = async(req, res) => {
     const { user } = req;    
 
     try {
-        const userData = await connection.knex.select('nome', 'email').from('users').where({id: user.id})
+        const userData = await connection.knex.select('nome', 'email').from('users').where({id: user.id}).first()
         return res.status(200).json(userData);
 
     } catch (error) {
