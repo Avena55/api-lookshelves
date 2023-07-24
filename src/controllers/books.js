@@ -84,9 +84,28 @@ const deleteBook = async (req, res) => {
     }
 }
 
+const getBook = async (req, res) => {
+    const { user } = req;
+    const { id: bookId } = req.params;
+
+    try {
+        const bookData = await connection.knex('books').where({ user_id: user.id, id: bookId}).first();
+
+        if (!bookData) {
+            return res.status(404).json('O livro não foi encontrado.');
+        }
+
+        return res.status(200).json(bookData)
+
+    } catch (error) {
+        return res.status(400).json(error.message); 
+    }
+} 
+
 module.exports = {
     registerBook,
     updateBook,
     deleteBook,
-    userShelf
+    userShelf,
+    getBook
 }

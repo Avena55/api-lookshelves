@@ -14,5 +14,6 @@ routes.patch('/livro/:id', books.updateBook);
 routes.delete('/livro/:id', books.deleteBook);
 routes.get('/estante', books.userShelf);
 routes.get('/usuario', users.getUser);
+routes.get('/livro/:id', books.getBook);
 
 module.exports = routes;
